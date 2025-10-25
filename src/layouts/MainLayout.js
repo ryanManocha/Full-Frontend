@@ -63,7 +63,7 @@ const MainLayout = () => {
         <Navbar />
         
         {/* Main Content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-auto">
           <Outlet context={{ resetKey }} />
         </main>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProgressBar from '../Shared/ProgressBar';
+import DatasetViewer from './DatasetViewer';
 
 const DatasetCard = () => {
   const [progress, setProgress] = useState(0);
@@ -32,8 +33,8 @@ const DatasetCard = () => {
   };
 
   return (
-    <div className="glass-effect rounded-xl p-6 border border-gray-200">
-      <div className="flex items-center justify-between mb-4">
+    <div className="glass-effect rounded-xl border border-gray-200">
+      <div className="flex items-center justify-between p-6 border-b border-gray-200">
         <h3 className="text-gray-900 text-lg font-semibold">Dataset</h3>
         <div className="flex items-center space-x-2">
           <div className={`w-2 h-2 rounded-full ${
@@ -43,33 +44,18 @@ const DatasetCard = () => {
         </div>
       </div>
       
-      <div className="space-y-4">
-        <ProgressBar progress={progress} />
-        
-        <div className="text-gray-700 text-sm">
-          {status === 'generating' ? (
-            <p>Collecting and labeling images for your model...</p>
-          ) : (
-            <p>Dataset generated with 1,247 labeled images</p>
-          )}
-        </div>
-        
-        {status === 'completed' && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-gray-900 font-semibold">1,247</div>
-                <div className="text-gray-600 text-xs">Images</div>
-              </div>
-              <div>
-                <div className="text-gray-900 font-semibold">15</div>
-                <div className="text-gray-600 text-xs">Classes</div>
-              </div>
-              <div>
-                <div className="text-gray-900 font-semibold">98.2%</div>
-                <div className="text-gray-600 text-xs">Quality</div>
-              </div>
+      <div>
+        {status === 'generating' ? (
+          <div className="p-6 space-y-4">
+            <ProgressBar progress={progress} />
+            
+            <div className="text-gray-700 text-sm">
+              <p>Collecting and labeling images for your model...</p>
             </div>
+          </div>
+        ) : (
+          <div className="max-h-[600px] overflow-auto">
+            <DatasetViewer />
           </div>
         )}
       </div>

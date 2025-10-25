@@ -14,9 +14,9 @@ const Home = () => {
   }, [resetKey]);
 
   return (
-    <div className="flex-1 bg-gray-50">
+    <div className="min-h-full bg-gray-50">
       {!chatSubmitted ? (
-        <div className="flex items-center justify-center p-8 h-full">
+        <div className="flex items-center justify-center p-8 min-h-screen">
           <div className="w-full max-w-4xl">
             {/* Feature Announcement */}
             <div className="text-center mb-8">
