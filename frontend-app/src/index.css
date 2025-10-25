@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #f8fafc;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+  }
+  
+  .resize-handle {
+    @apply w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors;
+  }
+  
+  .resize-handle:hover {
+    @apply bg-blue-500;
+  }
+
+  /* Glass Button Styles */
+  .glass-button-wrap {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .glass-button-wrap:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-button-wrap:active {
+    transform: translateY(0);
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .glass-button-text {
+    position: relative;
+    z-index: 3;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-button-shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  .glass-button-wrap:hover .glass-button-shadow {
+    opacity: 1;
+  }
+
+  /* Liquid glass effect */
+  .glass-button-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      rgba(255, 255, 255, 0.05) 25%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      rgba(255, 255, 255, 0.05) 75%, 
+      rgba(255, 255, 255, 0.1) 100%);
+    background-size: 200% 200%;
+    animation: liquidGlass 3s ease-in-out infinite;
+    border-radius: inherit;
+    z-index: 1;
+  }
+
+  @keyframes liquidGlass {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Test styles to ensure CSS is loading */
+  .test-glass-effect {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* Test GlowingEffect styles */
+  .test-glowing-effect {
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .test-glowing-effect::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -2px !important;
+    left: -2px !important;
+    right: -2px !important;
+    bottom: -2px !important;
+    background: linear-gradient(45deg, #dd7bbb, #d79f1e, #5a922c, #4c7894) !important;
+    opacity: 0 !important;
+    z-index: -1 !important;
+    border-radius: inherit !important;
+    transition: opacity 0.3s ease !important;
+  }
+
+  .test-glowing-effect:hover::before {
+    opacity: 0.8 !important;
+  }
+
+  /* Enhanced GlowingEffect visibility */
+  .glow {
+    position: relative;
+    z-index: 1;
+  }
+
+  .glow::after {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--glowingeffect-border-width));
+    border: var(--glowingeffect-border-width) solid transparent;
+    background: var(--gradient);
+    background-attachment: fixed;
+    opacity: var(--active);
+    transition: opacity 0.3s ease;
+    border-radius: inherit;
+    z-index: -1;
+    mask-clip: padding-box, border-box;
+    mask-composite: intersect;
+    mask-image: linear-gradient(#0000,#0000), conic-gradient(from calc((var(--start)-var(--spread))*1deg), #00000000 0deg, #fff, #00000000 calc(var(--spread)*2deg));
+  }
+
+  /* Debug styles to ensure GlowingEffect is working */
+  .debug-glow {
+    border: 2px solid red !important;
+  }
+
+  .debug-glow::before {
+    content: 'GLOW DEBUG' !important;
+    position: absolute !important;
+    top: -20px !important;
+    left: 0 !important;
+    color: red !important;
+    font-size: 10px !important;
+    z-index: 9999 !important;
+  }
+}
