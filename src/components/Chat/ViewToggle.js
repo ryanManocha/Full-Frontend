@@ -7,7 +7,7 @@ const ViewToggle = ({ viewMode, setViewMode }) => {
         onClick={() => setViewMode('grid')}
         className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
           viewMode === 'grid'
-            ? 'bg-white text-blue-600 shadow-sm'
+            ? 'bg-white text-black shadow-sm'
             : 'text-gray-600 hover:text-gray-900'
         }`}
       >
@@ -21,7 +21,7 @@ const ViewToggle = ({ viewMode, setViewMode }) => {
         onClick={() => setViewMode('list')}
         className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
           viewMode === 'list'
-            ? 'bg-white text-blue-600 shadow-sm'
+            ? 'bg-white text-black shadow-sm'
             : 'text-gray-600 hover:text-gray-900'
         }`}
       >

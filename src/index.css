@@ -25,15 +25,15 @@
     @apply bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm;
   }
   
-  .gradient-text {
-    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
-  }
+      .gradient-text {
+        @apply text-black;
+      }
   
   .resize-handle {
-    @apply w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors;
+    @apply w-1 bg-gray-300 hover:bg-black cursor-col-resize transition-colors;
   }
   
   .resize-handle:hover {
-    @apply bg-blue-500;
+    @apply bg-black;
   }
 }

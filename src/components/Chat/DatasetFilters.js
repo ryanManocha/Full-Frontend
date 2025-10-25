@@ -24,7 +24,7 @@ const DatasetFilters = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search..."
-          className="w-full px-3 py-1 border border-gray-300 text-sm focus:outline-none focus:border-blue-500"
+          className="w-full px-3 py-1 border border-gray-300 text-sm focus:outline-none focus:border-black"
         />
       </div>
 
@@ -33,7 +33,7 @@ const DatasetFilters = ({
         <select
           value={type1Filter}
           onChange={(e) => setType1Filter(e.target.value)}
-          className="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:border-blue-500"
+          className="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:border-black"
         >
           <option value="">Type 1</option>
           {uniqueType1s.map(type => (
@@ -44,7 +44,7 @@ const DatasetFilters = ({
         <select
           value={type2Filter}
           onChange={(e) => setType2Filter(e.target.value)}
-          className="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:border-blue-500"
+          className="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:border-black"
         >
           <option value="">Type 2</option>
           {uniqueType2s.map(type => (
@@ -55,7 +55,7 @@ const DatasetFilters = ({
         <select
           value={evolutionFilter}
           onChange={(e) => setEvolutionFilter(e.target.value)}
-          className="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:border-blue-500"
+          className="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:border-black"
         >
           <option value="all">Evolution</option>
           <option value="has-evolution">Has Evolution</option>
@@ -65,7 +65,7 @@ const DatasetFilters = ({
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="text-xs text-blue-600 hover:text-blue-800 underline"
+            className="text-xs text-black hover:text-gray-800 underline"
           >
             Clear
           </button>

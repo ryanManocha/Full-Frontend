@@ -6,9 +6,6 @@ const Navbar = () => {
       <div className="flex items-center justify-between">
         {/* Left side - Logo */}
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">LM</span>
-          </div>
           <span className="text-gray-900 text-xl font-bold">LovableModels</span>
         </div>
         
@@ -24,7 +21,7 @@ const Navbar = () => {
           <button className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
             Log in
           </button>
-          <button className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-medium">
+          <button className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all font-medium">
             Get started
           </button>
         </div>

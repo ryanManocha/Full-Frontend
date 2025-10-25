@@ -38,7 +38,7 @@ const DatasetCard = () => {
         <h3 className="text-gray-900 text-lg font-semibold">Dataset</h3>
         <div className="flex items-center space-x-2">
           <div className={`w-2 h-2 rounded-full ${
-            status === 'completed' ? 'bg-blue-500' : 'bg-blue-500 animate-pulse'
+            status === 'completed' ? 'bg-black' : 'bg-black animate-pulse'
           }`}></div>
           <span className="text-gray-600 text-sm">{getStatusText()}</span>
         </div>

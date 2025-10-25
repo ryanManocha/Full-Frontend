@@ -169,7 +169,7 @@ const DatasetViewer = () => {
               <p className="text-sm text-gray-500 mb-3">No items match your filters</p>
               <button 
                 onClick={clearFilters}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                className="text-xs text-black hover:text-gray-800 underline"
               >
                 Clear filters
               </button>

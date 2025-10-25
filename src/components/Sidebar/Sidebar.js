@@ -39,7 +39,7 @@ const Sidebar = ({ onNewProject }) => {
       <div className="p-6 border-t border-gray-200">
         <button 
           onClick={handleNewProject}
-          className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium transition-all"
+          className="w-full px-4 py-3 bg-black hover:bg-gray-800 text-white rounded-lg font-medium transition-all"
         >
           + New Project
         </button>

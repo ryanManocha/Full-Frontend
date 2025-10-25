@@ -6,7 +6,7 @@ const GridView = ({ data, onImageClick }) => {
       {data.map((pokemon, index) => (
         <div
           key={pokemon.name}
-          className="border border-gray-300 hover:border-gray-400 cursor-pointer"
+          className="border border-gray-300 hover:border-black cursor-pointer"
           onClick={() => onImageClick(pokemon, index)}
         >
           {/* Image */}

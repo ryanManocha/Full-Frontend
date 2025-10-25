@@ -101,7 +101,7 @@ const ListView = ({ data, onImageClick }) => {
             {sortedData.map((pokemon, index) => (
               <tr 
                 key={pokemon.name}
-                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                className="hover:bg-gray-100 cursor-pointer transition-colors"
                 onClick={() => onImageClick(pokemon, index)}
               >
                 <td className="px-4 py-2 whitespace-nowrap">
