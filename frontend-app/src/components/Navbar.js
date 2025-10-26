@@ -8,9 +8,9 @@ const Navbar = () => {
         {/* Left side - Logo */}
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">LM</span>
+            <span className="text-white font-bold text-sm">YL</span>
           </div>
-          <span className="text-white text-xl font-bold mix-blend-exclusion">LovableModels</span>
+          <span className="text-white text-xl font-bold mix-blend-exclusion">YuroLabs</span>
         </div>
         
         {/* Center - Navigation Links */}

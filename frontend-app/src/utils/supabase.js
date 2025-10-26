@@ -50,3 +50,4 @@ export const getImageCount = async (jobId) => {
 };
 
 export default supabase;
+

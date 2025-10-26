@@ -21,7 +21,7 @@ const Home = () => {
             {/* Feature Announcement */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white text-sm mb-6">
-                <span>Introducing LovableModels</span>
+                <span>Introducing YuroLabs</span>
                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -30,7 +30,7 @@ const Home = () => {
               {/* Main Title */}
               <h1 className="text-6xl md:text-7xl font-bold text-white mb-4 mix-blend-exclusion">
                 Build something{' '}
-                <span className="gradient-text">LovableModels</span>
+                <span className="gradient-text">YuroLabs</span>
               </h1>
               
               {/* Subtitle */}

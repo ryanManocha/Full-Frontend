@@ -11,7 +11,13 @@ const ModelCard = () => {
   const formatModelUrl = (url, className) => {
     if (!url) return url;
     
-    // If URL doesn't contain model type, add yolov8s as default
+    // Handle video training model format: models/energy_drink_can-20251026-143025.pt
+    if (url.includes('models/') && url.includes('-') && url.endsWith('.pt')) {
+      // Video model URL format is already correct
+      return url;
+    }
+    
+    // Handle image training model format: add model type if missing
     if (url.includes('_best.pt') && !url.includes('yolov8')) {
       return url.replace('_best.pt', '_yolov8s_best.pt');
     }

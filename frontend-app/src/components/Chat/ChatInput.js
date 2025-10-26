@@ -13,27 +13,116 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
   const [error, setError] = useState(null);
   const [maxImages, setMaxImages] = useState(10);
   const [epochs, setEpochs] = useState(5);
+  const [fps, setFps] = useState(1.0);
+  const [augmentationsPerFrame, setAugmentationsPerFrame] = useState(5);
+  const [originalAugmentsPerFrame, setOriginalAugmentsPerFrame] = useState(2);
+  const [modelType, setModelType] = useState('yolo11n');
   const fileInputRef = useRef(null);
   
   const { setCurrentJobId, setError: setGlobalError } = useUI();
 
+  // Video training API call
+  const startVideoTraining = async (videoFile) => {
+    console.log('🎬 Starting video training with file:', videoFile);
+    console.log('📁 File type:', videoFile?.type);
+    console.log('📁 File name:', videoFile?.name);
+    console.log('📁 File size:', videoFile?.size);
+    
+    const formData = new FormData();
+    formData.append('video', videoFile);
+    formData.append('modeltype', modelType || 'yolo11n');  // Ensure defaults
+    formData.append('epochs', String(epochs || 100));
+    formData.append('max_images', String(maxImages || 500));
+    formData.append('fps', String(fps || 1.0));
+    formData.append('s3_bucket', 'lovablemodels-datasets');
+    formData.append('augmentations_per_frame', String(augmentationsPerFrame || 5));
+    formData.append('original_augments_per_frame', String(originalAugmentsPerFrame || 2));
+    formData.append('size', '640');
+
+    // Debug FormData contents
+    console.log('📋 FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+
+    const response = await fetch('https://jayanth-sidamsety--vidtomod-fastapi-app.modal.run/train', {
+      method: 'POST',
+      body: formData,
+      // Don't set Content-Type header - let the browser set it with boundary
+      // Some APIs are sensitive to this
+    });
+
+    console.log('📡 Response status:', response.status);
+    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('📡 Response URL:', response.url);
+
+    if (!response.ok) {
+      const errorText = await response.text();  // Get the full error message
+      console.error('❌ Error response:', errorText);
+      console.error('❌ Response status:', response.status);
+      console.error('❌ Response statusText:', response.statusText);
+      
+      if (response.status === 303) {
+        throw new Error(`Video training failed: Server redirected (303). Check if the API endpoint URL is correct.`);
+      }
+      
+      throw new Error(`Video training failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (inputValue.trim() && !isLoading) {
+    if ((inputValue.trim() || attachedFiles.length > 0) && !isLoading) {
       setIsLoading(true);
       setError(null);
       setGlobalError(null);
       
       try {
-        // Start training with the prompt using user-specified parameters
-        const result = await startTraining(inputValue.trim(), 'coco', maxImages, epochs);
+        let result;
+        
+        // PRIORITY: Check if there's a video file attached (mp4 or mov)
+        const videoFile = attachedFiles.find(file => 
+          file.type === 'video/mp4' || 
+          file.type === 'video/quicktime' || 
+          file.type === 'video/mov' || 
+          file.name.toLowerCase().endsWith('.mp4') || 
+          file.name.toLowerCase().endsWith('.mov') ||
+          file.name.toLowerCase().endsWith('.avi') ||
+          file.name.toLowerCase().endsWith('.mkv') ||
+          file.name.toLowerCase().endsWith('.webm') ||
+          file.name.toLowerCase().endsWith('.flv') ||
+          file.name.toLowerCase().endsWith('.wmv') ||
+          file.name.toLowerCase().endsWith('.mpeg') ||
+          file.name.toLowerCase().endsWith('.mpg')
+        );
+        
+        if (videoFile) {
+          // VIDEO TRAINING ONLY - Uses Modal video training API
+          // This will NEVER call the GCP image training endpoint
+          console.log('🎥 Video file detected - using Modal video training API only');
+          console.log('Video file object:', videoFile);
+          result = await startVideoTraining(videoFile);
+          console.log('Video training started:', result);
+          setCurrentPrompt(`Video training: ${videoFile.name}`);
+        } else if (inputValue.trim()) {
+          // IMAGE TRAINING ONLY - Uses GCP image training API
+          // This will ONLY run if NO video file is attached
+          console.log('📝 Text prompt detected - using GCP image training API');
+          result = await startTraining(inputValue.trim(), 'coco', maxImages, epochs);
+          console.log('Image training started:', result);
+          setCurrentPrompt(inputValue.trim());
+        } else {
+          // No video file and no text input
+          setError('Please enter a prompt or attach a video file');
+          setIsLoading(false);
+          return;
+        }
         
         // Store the job ID and update UI
         setCurrentJobId(result.job_id);
-        setCurrentPrompt(inputValue.trim());
         setChatSubmitted(true);
-        
-        console.log('Training started:', result);
       } catch (err) {
         const errorMessage = handleApiError(err);
         setError(errorMessage);
@@ -90,7 +179,7 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask LovableModels to create a model that detects..."
+            placeholder="Ask YuroLabs to create a model that detects..."
             className="w-full bg-transparent text-white placeholder-white/60 text-lg focus:outline-none"
           />
           
@@ -184,7 +273,7 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
             multiple
             onChange={handleFileChange}
             className="hidden"
-            accept="image/*,.pdf,.doc,.docx,.txt"
+            accept="image/*,.pdf,.doc,.docx,.txt,.mp4,.mov"
           />
           
           {/* Bottom Controls */}
@@ -238,6 +327,44 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
                   className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400"
                 />
               </div>
+
+              {/* Video-specific parameters - only show when video file is attached */}
+              {attachedFiles.some(file => 
+                file.type === 'video/mp4' || 
+                file.type === 'video/quicktime' || 
+                file.name.toLowerCase().endsWith('.mp4') || 
+                file.name.toLowerCase().endsWith('.mov')
+              ) && (
+                <>
+                  <div className="flex items-center space-x-2">
+                    <label className="text-white/70 text-sm font-medium">FPS:</label>
+                    <input
+                      type="number"
+                      min="0.1"
+                      max="10"
+                      step="0.1"
+                      value={fps}
+                      onChange={(e) => setFps(parseFloat(e.target.value) || 1.0)}
+                      className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <label className="text-white/70 text-sm font-medium">Model:</label>
+                    <select
+                      value={modelType}
+                      onChange={(e) => setModelType(e.target.value)}
+                      className="w-20 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400"
+                    >
+                      <option value="yolo11n">YOLO11n</option>
+                      <option value="yolo11s">YOLO11s</option>
+                      <option value="yolo11m">YOLO11m</option>
+                      <option value="yolo11l">YOLO11l</option>
+                      <option value="yolo11x">YOLO11x</option>
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
             
             <div className="flex items-center space-x-3">
