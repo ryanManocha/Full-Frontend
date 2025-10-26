@@ -6,6 +6,18 @@ import { useJobPolling } from '../../hooks/useJobPolling';
 
 const ModelCard = () => {
   const { currentJobId, setModelUrl, setModelSize, setModelStatus, isDatasetViewerExpanded } = useUI();
+
+  // Format model URL to ensure correct naming convention
+  const formatModelUrl = (url, className) => {
+    if (!url) return url;
+    
+    // If URL doesn't contain model type, add yolov8s as default
+    if (url.includes('_best.pt') && !url.includes('yolov8')) {
+      return url.replace('_best.pt', '_yolov8s_best.pt');
+    }
+    
+    return url;
+  };
   
   // Use job polling hook
   const { jobStatus, isLoading, error } = useJobPolling(currentJobId);
@@ -14,7 +26,8 @@ const ModelCard = () => {
   useEffect(() => {
     if (jobStatus) {
       if (jobStatus.model_url) {
-        setModelUrl(jobStatus.model_url);
+        const formattedUrl = formatModelUrl(jobStatus.model_url, jobStatus.class_trained);
+        setModelUrl(formattedUrl);
       }
       if (jobStatus.model_size_mb) {
         setModelSize(jobStatus.model_size_mb);
@@ -121,7 +134,7 @@ const ModelCard = () => {
                     </button>
                     {jobStatus.model_url && (
                       <a
-                        href={jobStatus.model_url}
+                        href={formatModelUrl(jobStatus.model_url, jobStatus.class_trained)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 text-sm font-medium transition-all text-center"
