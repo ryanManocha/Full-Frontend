@@ -55,3 +55,4 @@ export const getErrorType = (error) => {
   }
   return 'unknown';
 };
+
