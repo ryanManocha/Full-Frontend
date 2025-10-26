@@ -11,6 +11,8 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
   const [linkInput, setLinkInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [maxImages, setMaxImages] = useState(10);
+  const [epochs, setEpochs] = useState(5);
   const fileInputRef = useRef(null);
   
   const { setCurrentJobId, setError: setGlobalError } = useUI();
@@ -23,8 +25,8 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
       setGlobalError(null);
       
       try {
-        // Start training with the prompt (1 epoch for faster testing)
-        const result = await startTraining(inputValue.trim(), 'coco', 5, 1);
+        // Start training with the prompt using user-specified parameters
+        const result = await startTraining(inputValue.trim(), 'coco', maxImages, epochs);
         
         // Store the job ID and update UI
         setCurrentJobId(result.job_id);
@@ -209,6 +211,33 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
                 </svg>
                 <span className="text-sm">Links</span>
               </button>
+            </div>
+            
+            {/* Training Parameters */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <label className="text-white/70 text-sm font-medium">Images:</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  value={maxImages}
+                  onChange={(e) => setMaxImages(parseInt(e.target.value) || 10)}
+                  className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <label className="text-white/70 text-sm font-medium">Epochs:</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={epochs}
+                  onChange={(e) => setEpochs(parseInt(e.target.value) || 5)}
+                  className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400"
+                />
+              </div>
             </div>
             
             <div className="flex items-center space-x-3">

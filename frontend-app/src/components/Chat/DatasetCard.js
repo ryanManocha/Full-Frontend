@@ -8,25 +8,25 @@ import { useJobPolling } from '../../hooks/useJobPolling';
 const DatasetCard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isExpanded, setIsExpanded] = useState(false);
-  const { currentJobId, setTrainingImages, setDatasetStatus } = useUI();
+  const { currentJobId, setTrainingImages, setDatasetStatus, setIsDatasetViewerExpanded, trainingImages, datasetStatus } = useUI();
   
   // Use job polling hook
   const { jobStatus, isLoading, error } = useJobPolling(currentJobId);
 
-  // Update global state when job status changes
+  // Update global state when job status changes (only when jobStatus actually changes)
   useEffect(() => {
     if (jobStatus) {
       setTrainingImages(jobStatus.training_images || 0);
       
       if (jobStatus.status === 'training') {
-        setDatasetStatus('generating', 50); // Show progress during training
+        setDatasetStatus('generating', 50);
       } else if (jobStatus.status === 'success') {
         setDatasetStatus('completed', 100);
       } else if (jobStatus.status === 'error') {
         setDatasetStatus('error', 0);
       }
     }
-  }, [jobStatus, setTrainingImages, setDatasetStatus]);
+  }, [jobStatus?.status, jobStatus?.training_images]); // Only depend on the actual values, not the whole object
 
   const getStatusText = () => {
     if (!currentJobId) return 'Waiting for training...';
@@ -170,15 +170,18 @@ const DatasetCard = () => {
               {/* Expand Button */}
               <div className="flex items-center justify-between">
                 <h3 className="text-white text-lg font-semibold">Dataset Viewer</h3>
-                <button
-                  onClick={() => setIsExpanded(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                  </svg>
-                  <span>Expand View</span>
-                </button>
+                    <button
+                      onClick={() => {
+                        setIsExpanded(true);
+                        setIsDatasetViewerExpanded(true);
+                      }}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                      <span>Expand View</span>
+                    </button>
               </div>
               
               {/* Compact Preview */}
@@ -200,15 +203,18 @@ const DatasetCard = () => {
                 <h2 className="text-xl font-bold text-white">Pokemon Classification Dataset</h2>
                 <p className="text-white/70 text-sm">Full dataset viewer with enhanced navigation</p>
               </div>
-              <button
-                onClick={() => setIsExpanded(false)}
-                className="flex items-center space-x-2 px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors border border-white/30"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                <span>Close</span>
-              </button>
+                  <button
+                    onClick={() => {
+                      setIsExpanded(false);
+                      setIsDatasetViewerExpanded(false);
+                    }}
+                    className="flex items-center space-x-2 px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors border border-white/30"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Close</span>
+                  </button>
             </div>
 
             {/* Full Screen Content */}

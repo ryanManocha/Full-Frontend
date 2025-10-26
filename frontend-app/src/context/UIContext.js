@@ -16,6 +16,7 @@ const UI_ACTIONS = {
   SET_MODEL_URL: 'SET_MODEL_URL',
   SET_MODEL_SIZE: 'SET_MODEL_SIZE',
   SET_ERROR: 'SET_ERROR',
+  SET_DATASET_VIEWER_EXPANDED: 'SET_DATASET_VIEWER_EXPANDED',
   RESET_STATE: 'RESET_STATE',
 };
 
@@ -35,6 +36,7 @@ const initialState = {
   modelUrl: null,
   modelSizeMb: 0,
   error: null,
+  isDatasetViewerExpanded: false,
 };
 
 // Reducer function
@@ -106,6 +108,12 @@ const uiReducer = (state, action) => {
       return {
         ...state,
         error: action.payload,
+      };
+    
+    case UI_ACTIONS.SET_DATASET_VIEWER_EXPANDED:
+      return {
+        ...state,
+        isDatasetViewerExpanded: action.payload,
       };
     
     case UI_ACTIONS.RESET_STATE:
@@ -201,6 +209,13 @@ export const UIProvider = ({ children }) => {
     });
   };
 
+  const setIsDatasetViewerExpanded = (expanded) => {
+    dispatch({
+      type: UI_ACTIONS.SET_DATASET_VIEWER_EXPANDED,
+      payload: expanded,
+    });
+  };
+
   const resetState = () => {
     dispatch({
       type: UI_ACTIONS.RESET_STATE,
@@ -223,6 +238,7 @@ export const UIProvider = ({ children }) => {
     setModelUrl,
     setModelSize,
     setError,
+    setIsDatasetViewerExpanded,
     resetState,
   };
 

@@ -5,12 +5,12 @@ import { useUI } from '../../context/UIContext';
 import { useJobPolling } from '../../hooks/useJobPolling';
 
 const ModelCard = () => {
-  const { currentJobId, setModelUrl, setModelSize, setModelStatus } = useUI();
+  const { currentJobId, setModelUrl, setModelSize, setModelStatus, isDatasetViewerExpanded } = useUI();
   
   // Use job polling hook
   const { jobStatus, isLoading, error } = useJobPolling(currentJobId);
 
-  // Update global state when job status changes
+  // Update global state when job status changes (only when jobStatus actually changes)
   useEffect(() => {
     if (jobStatus) {
       if (jobStatus.model_url) {
@@ -28,7 +28,7 @@ const ModelCard = () => {
         setModelStatus('error', 0);
       }
     }
-  }, [jobStatus, setModelUrl, setModelSize, setModelStatus]);
+  }, [jobStatus?.status, jobStatus?.model_url, jobStatus?.model_size_mb]); // Only depend on the actual values
 
   const getStatusText = () => {
     if (!currentJobId) return 'Waiting for training...';
@@ -114,21 +114,23 @@ const ModelCard = () => {
               </div>
             </div>
             
-            <div className="mt-4 flex space-x-2">
-              <button className="flex-1 px-4 py-2 bg-white/20 hover:bg-white/30 border border-white/30 rounded-lg text-white text-sm font-medium transition-colors">
-                Test Model
-              </button>
-              {jobStatus.model_url && (
-                <a
-                  href={jobStatus.model_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 text-sm font-medium transition-all text-center"
-                >
-                  Download Model
-                </a>
-              )}
-            </div>
+                {!isDatasetViewerExpanded && (
+                  <div className="mt-4 flex space-x-2">
+                    <button className="flex-1 px-4 py-2 bg-white/20 hover:bg-white/30 border border-white/30 rounded-lg text-white text-sm font-medium transition-colors">
+                      Test Model
+                    </button>
+                    {jobStatus.model_url && (
+                      <a
+                        href={jobStatus.model_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 text-sm font-medium transition-all text-center"
+                      >
+                        Download Model
+                      </a>
+                    )}
+                  </div>
+                )}
           </div>
         )}
       </div>
