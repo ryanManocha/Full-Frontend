@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { GlassButton } from '../ui/glass-button.tsx';
+import { useUI } from '../../context/UIContext';
+import { startTraining, handleApiError, COCO_CLASSES } from '../../utils/api';
 
 const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
   const [inputValue, setInputValue] = useState('');
@@ -7,13 +9,37 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
   const [links, setLinks] = useState([]);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkInput, setLinkInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+  
+  const { setCurrentJobId, setError: setGlobalError } = useUI();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (inputValue.trim()) {
-      setCurrentPrompt(inputValue.trim());
-      setChatSubmitted(true);
+    if (inputValue.trim() && !isLoading) {
+      setIsLoading(true);
+      setError(null);
+      setGlobalError(null);
+      
+      try {
+        // Start training with the prompt (1 epoch for faster testing)
+        const result = await startTraining(inputValue.trim(), 'coco', 5, 1);
+        
+        // Store the job ID and update UI
+        setCurrentJobId(result.job_id);
+        setCurrentPrompt(inputValue.trim());
+        setChatSubmitted(true);
+        
+        console.log('Training started:', result);
+      } catch (err) {
+        const errorMessage = handleApiError(err);
+        setError(errorMessage);
+        setGlobalError(errorMessage);
+        console.error('Training failed:', errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -49,6 +75,13 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="relative">
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">
+            {error}
+          </div>
+        )}
+        
         {/* Main Input */}
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
           <input
@@ -192,10 +225,17 @@ const ChatInput = ({ setChatSubmitted, setCurrentPrompt }) => {
                 type="submit"
                 size="icon"
                 contentClassName="flex items-center justify-center"
+                disabled={isLoading || !inputValue.trim()}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
+                {isLoading ? (
+                  <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                )}
               </GlassButton>
             </div>
           </div>

@@ -3,6 +3,8 @@ import DatasetStats from './DatasetStats';
 import ImageGrid from './ImageGrid';
 import ClassSidebar from './ClassSidebar';
 import DatasetHeader from './DatasetHeader';
+import { useUI } from '../../context/UIContext';
+import { getTrainingImages } from '../../utils/api';
 
 const DatasetViewer = () => {
   const [datasetData, setDatasetData] = useState(null);
@@ -11,6 +13,9 @@ const DatasetViewer = () => {
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const { currentJobId, jobStatus } = useUI();
 
   // Parse CSV data
   const parseCSV = (csvText) => {
@@ -48,83 +53,61 @@ const DatasetViewer = () => {
     return colors[type] || '#6b7280';
   };
 
-  // Load dataset data
+  // Load dataset data from Supabase
   useEffect(() => {
     const loadDataset = async () => {
+      if (!currentJobId) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Load Pokemon CSV data
-        const response = await fetch('/pokemon.csv');
-        const csvText = await response.text();
-        const pokemonData = parseCSV(csvText);
+        setLoading(true);
+        setError(null);
+
+        // Get Supabase connection info from backend
+        const imageInfo = await getTrainingImages(currentJobId);
         
-        // Count types for class statistics
-        const typeCounts = {};
-        pokemonData.forEach(pokemon => {
-          typeCounts[pokemon.Type1] = (typeCounts[pokemon.Type1] || 0) + 1;
-          if (pokemon.Type2) {
-            typeCounts[pokemon.Type2] = (typeCounts[pokemon.Type2] || 0) + 1;
-          }
-        });
-
-        const classes = Object.entries(typeCounts).map(([type, count]) => ({
-          name: type,
-          count: count,
-          color: getTypeColor(type)
-        })).sort((a, b) => b.count - a.count);
-
+        // For now, show a placeholder until we implement Supabase client
         const datasetData = {
-          name: 'Pokemon Classification Dataset',
-          description: 'A comprehensive dataset of Pokemon images with type classifications and evolution chains.',
-          totalImages: pokemonData.length,
-          classes: classes,
-          images: pokemonData.map((pokemon, index) => ({
-            id: index + 1,
-            name: pokemon.Name,
-            filename: `${pokemon.Name}.png`,
-            type1: pokemon.Type1,
-            type2: pokemon.Type2 || null,
-            fileSize: Math.floor(Math.random() * 50 + 10), // 10-60 kB
-            imageUrl: `/images/${pokemon.Name}.png`,
-            evolution: pokemon.Evolution
-          }))
+          name: 'YOLO Training Dataset',
+          description: `Training images for ${jobStatus?.class_trained || 'object detection'} model`,
+          totalImages: jobStatus?.training_images || 0,
+          classes: [
+            { 
+              name: jobStatus?.class_trained || 'object', 
+              count: jobStatus?.training_images || 0, 
+              color: '#3b82f6' 
+            }
+          ],
+          images: generatePlaceholderImages(jobStatus?.training_images || 0, jobStatus?.class_trained || 'object')
         };
         
         setDatasetData(datasetData);
         setLoading(false);
       } catch (error) {
         console.error('Error loading dataset:', error);
-        // Fallback to mock data if CSV loading fails
-        const mockData = {
-          name: 'Pokemon Classification Dataset',
-          description: 'A comprehensive dataset of Pokemon images with type classifications and evolution chains.',
-          totalImages: 809,
-          classes: [
-            { name: 'Grass', count: 95, color: '#4ade80' },
-            { name: 'Fire', count: 78, color: '#f87171' },
-            { name: 'Water', count: 89, color: '#60a5fa' },
-            { name: 'Bug', count: 67, color: '#a3a3a3' },
-            { name: 'Normal', count: 98, color: '#d4d4d8' },
-            { name: 'Electric', count: 45, color: '#fbbf24' },
-            { name: 'Psychic', count: 56, color: '#c084fc' },
-            { name: 'Fighting', count: 43, color: '#fb7185' },
-            { name: 'Rock', count: 38, color: '#a78bfa' },
-            { name: 'Ground', count: 41, color: '#f59e0b' },
-            { name: 'Flying', count: 52, color: '#06b6d4' },
-            { name: 'Poison', count: 48, color: '#8b5cf6' },
-            { name: 'Ghost', count: 35, color: '#6366f1' },
-            { name: 'Dragon', count: 28, color: '#ec4899' },
-            { name: 'Steel', count: 31, color: '#64748b' }
-          ],
-          images: generateMockImages()
-        };
-        
-        setDatasetData(mockData);
+        setError('Failed to load training images');
         setLoading(false);
       }
     };
 
     loadDataset();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentJobId, jobStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Generate placeholder images for training dataset
+  const generatePlaceholderImages = (count, className) => {
+    return Array.from({ length: count }, (_, index) => ({
+      id: index + 1,
+      name: `${className}_${index + 1}`,
+      filename: `${className}_${index + 1}.jpg`,
+      type1: className,
+      type2: null,
+      fileSize: Math.floor(Math.random() * 100 + 50), // 50-150 kB
+      imageUrl: `https://via.placeholder.com/640x480/3b82f6/ffffff?text=${className}+${index + 1}`,
+      confidence: Math.random() * 0.3 + 0.7 // 0.7-1.0
+    }));
+  };
 
   // Generate mock image data based on Pokemon names
   const generateMockImages = () => {
@@ -213,14 +196,25 @@ const DatasetViewer = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-white/70">Loading training dataset...</span>
       </div>
     );
   }
 
-  if (!datasetData) {
+  if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No dataset available</p>
+        <p className="text-red-400 mb-2">Error loading dataset</p>
+        <p className="text-white/50 text-sm">{error}</p>
+      </div>
+    );
+  }
+
+  if (!datasetData || !currentJobId) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-white/70">No training dataset available</p>
+        <p className="text-white/50 text-sm">Start a training job to view images</p>
       </div>
     );
   }

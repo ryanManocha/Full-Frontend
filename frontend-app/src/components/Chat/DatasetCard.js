@@ -2,37 +2,60 @@ import React, { useState, useEffect } from 'react';
 import ProgressBar from '../Shared/ProgressBar';
 import DatasetViewer from '../DatasetViewer/DatasetViewer';
 import { GlowingEffect } from '../ui/glowing-effect.jsx';
+import { useUI } from '../../context/UIContext';
+import { useJobPolling } from '../../hooks/useJobPolling';
 
 const DatasetCard = () => {
-  const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState('generating');
   const [activeTab, setActiveTab] = useState('overview');
   const [isExpanded, setIsExpanded] = useState(false);
+  const { currentJobId, setTrainingImages, setDatasetStatus } = useUI();
+  
+  // Use job polling hook
+  const { jobStatus, isLoading, error } = useJobPolling(currentJobId);
 
+  // Update global state when job status changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          setStatus('completed');
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + Math.random() * 8;
-      });
-    }, 600);
-
-    return () => clearInterval(interval);
-  }, []);
+    if (jobStatus) {
+      setTrainingImages(jobStatus.training_images || 0);
+      
+      if (jobStatus.status === 'training') {
+        setDatasetStatus('generating', 50); // Show progress during training
+      } else if (jobStatus.status === 'success') {
+        setDatasetStatus('completed', 100);
+      } else if (jobStatus.status === 'error') {
+        setDatasetStatus('error', 0);
+      }
+    }
+  }, [jobStatus, setTrainingImages, setDatasetStatus]);
 
   const getStatusText = () => {
-    switch (status) {
-      case 'generating':
-        return 'Generating dataset...';
-      case 'completed':
-        return 'Dataset ready!';
-      default:
-        return 'Preparing...';
+    if (!currentJobId) return 'Waiting for training...';
+    
+    if (isLoading) return 'Checking status...';
+    
+    if (error) return 'Error occurred';
+    
+    if (jobStatus) {
+      switch (jobStatus.status) {
+        case 'training':
+          return 'Training in progress...';
+        case 'success':
+          return 'Dataset ready!';
+        case 'error':
+          return 'Training failed';
+        default:
+          return 'Preparing...';
+      }
     }
+    
+    return 'Starting training...';
+  };
+
+  const getProgress = () => {
+    if (!currentJobId) return 0;
+    if (jobStatus?.status === 'success') return 100;
+    if (jobStatus?.status === 'training') return 50; // Show progress during training
+    return 0;
   };
 
   // Handle escape key to close expanded view
@@ -102,36 +125,41 @@ const DatasetCard = () => {
                 <h3 className="text-white text-lg font-semibold">Dataset</h3>
                 <div className="flex items-center space-x-2">
                   <div className={`w-2 h-2 rounded-full ${
-                    status === 'completed' ? 'bg-blue-400' : 'bg-blue-400 animate-pulse'
+                    jobStatus?.status === 'success' ? 'bg-blue-400' : 
+                    jobStatus?.status === 'error' ? 'bg-red-400' : 'bg-blue-400 animate-pulse'
                   }`}></div>
                   <span className="text-white/70 text-sm">{getStatusText()}</span>
                 </div>
               </div>
               
-              <ProgressBar progress={progress} />
+              <ProgressBar progress={getProgress()} />
               
               <div className="text-white/80 text-sm">
-                {status === 'generating' ? (
-                  <p>Collecting and labeling images for your model...</p>
+                {jobStatus?.status === 'training' ? (
+                  <p>Training your YOLO model with COCO dataset...</p>
+                ) : jobStatus?.status === 'success' ? (
+                  <p>Dataset ready with {jobStatus.training_images || 0} training images</p>
+                ) : error ? (
+                  <p className="text-red-300">Error: {error}</p>
                 ) : (
-                  <p>Dataset generated with 1,247 labeled images</p>
+                  <p>Preparing to start training...</p>
                 )}
               </div>
               
-              {status === 'completed' && (
+              {jobStatus?.status === 'success' && (
                 <div className="mt-4 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <div className="text-white font-semibold">1,247</div>
+                      <div className="text-white font-semibold">{jobStatus.training_images || 0}</div>
                       <div className="text-white/70 text-xs">Images</div>
                     </div>
                     <div>
-                      <div className="text-white font-semibold">15</div>
-                      <div className="text-white/70 text-xs">Classes</div>
+                      <div className="text-white font-semibold">1</div>
+                      <div className="text-white/70 text-xs">Class</div>
                     </div>
                     <div>
-                      <div className="text-white font-semibold">98.2%</div>
-                      <div className="text-white/70 text-xs">Quality</div>
+                      <div className="text-white font-semibold">YOLOv8</div>
+                      <div className="text-white/70 text-xs">Model</div>
                     </div>
                   </div>
                 </div>
